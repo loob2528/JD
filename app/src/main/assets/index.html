@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="fr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Rétroviseurs</title>
+<style>
+:root{--bg:#0b0f14;--card:#141a22;--key:#1e2733;--line:#263140;--txt:#e8eef5;--mut:#7f8b99;--acc:#3b82f6;--ok:#22c55e;--ko:#ef4444}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;touch-action:none}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Roboto,sans-serif;display:flex;flex-direction:column;gap:12px;padding:14px}
+header{display:flex;justify-content:space-between;align-items:center}
+.ttl{font-size:22px;font-weight:600;letter-spacing:.2px}
+.chip{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:14px;color:var(--mut)}
+.chip i{width:10px;height:10px;border-radius:50%;background:var(--mut)}
+.chip.ok{color:var(--ok)}.chip.ok i{background:var(--ok)}
+.chip.ko{color:var(--ko)}.chip.ko i{background:var(--ko)}
+main{flex:1;min-height:0;display:grid;gap:12px;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:16px;min-height:0;display:flex;flex-direction:column}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg button{height:64px;border-radius:18px;border:1px solid var(--line);background:var(--key);color:var(--mut);font-size:19px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit}
+.seg button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.seg svg{width:28px;height:28px}
+.stage{flex:1;display:flex;align-items:center;justify-content:center;min-height:110px;perspective:600px}
+#glass{width:min(60%,200px);transition:transform .25s ease;transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) scaleX(var(--sx,1))}
+#glass svg{width:100%;display:block}
+#msg{text-align:center;font-size:17px;color:var(--mut);height:26px}
+#msg.go{color:var(--txt)}
+.hz{margin-top:10px;height:60px;border-radius:18px;border:1px solid var(--line);background:var(--key);color:var(--txt);font-size:18px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit}
+.hz svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.hz.on{background:var(--ko);border-color:var(--ko);color:#fff;animation:bl 1s steps(1) infinite}
+@keyframes bl{50%{opacity:.55}}
+.right{align-items:center;justify-content:center}
+.pad{width:min(100%,62vh,400px);aspect-ratio:1;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);gap:12px}
+.arr{border:0;border-radius:24px;background:var(--key);display:flex;align-items:center;justify-content:center;transition:transform .08s,background .08s}
+.arr svg{width:46%;fill:none;stroke:var(--txt);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.arr.act{background:var(--acc);transform:scale(.95)}
+.u{grid-area:1/2}.l{grid-area:2/1}.r{grid-area:2/3}.d{grid-area:3/2}
+.r svg{transform:rotate(90deg)}.d svg{transform:rotate(180deg)}.l svg{transform:rotate(270deg)}
+.hub{grid-area:2/2;border-radius:50%;background:var(--bg);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:var(--mut)}
+@media (orientation:landscape){main{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}}
+</style></head><body>
+<header>
+<div class="ttl">Rétroviseurs</div>
+<div id="chip" class="chip"><i></i><span id="cst">Connexion…</span></div>
+</header>
+<main>
+<section class="card">
+<div class="seg">
+<button id="b1" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7c0-2-2-3-5-3H9C6 4 4 5 4 8v6c0 3 2 5 5 5h6c3 0 5-2 5-5z"/></svg>Gauche</button>
+<button id="b2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7c0-2 2-3 5-3h6c3 1 5 2 5 4v6c0 3-2 5-5 5H9c-3 0-5-2-5-5z"/></svg>Droit</button>
+</div>
+<div class="stage"><div id="glass"><svg viewBox="0 0 200 130"><path d="M24 40Q24 14 62 14H146Q184 14 184 52V84Q184 118 146 118H62Q24 118 24 84Z" fill="#1b2a3f" stroke="#3a4b63" stroke-width="5"/><path d="M52 34H110L76 98H52Z" fill="#fff" opacity=".09"/></svg></div></div>
+<div id="msg">Prêt</div>
+<button id="hz" class="hz"><svg viewBox="0 0 24 24"><path d="M12 3L2.5 20h19z"/><path d="M12 9.5L7 18h10z"/></svg><span id="hzt">Warning</span></button>
+</section>
+<section class="card right">
+<div class="pad">
+<button class="arr u" data-a="v" data-d="1" aria-label="Haut"><svg viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg></button>
+<button class="arr l" data-a="h" data-d="1" aria-label="Gauche"><svg viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg></button>
+<div class="hub" id="hub">G</div>
+<button class="arr r" data-a="h" data-d="0" aria-label="Droite"><svg viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg></button>
+<button class="arr d" data-a="v" data-d="0" aria-label="Bas"><svg viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg></button>
+</div>
+</section>
+</main>
+<script>
+var mir=1,timer=null;
+var NAMES={1:'gauche',2:'droit'};
+function $(i){return document.getElementById(i)}
+function online(v){
+  $('chip').className='chip '+(v?'ok':'ko');
+  $('cst').textContent=v?'Connecté':'Hors ligne';
+}
+var haz=false;
+function setHaz(v){haz=v;$('hz').className='hz'+(v?' on':'');$('hzt').textContent=v?'Warning activé':'Warning';}
+function syncHaz(){
+  var x=new XMLHttpRequest();
+  x.open('GET','/w',true);
+  x.timeout=1500;
+  x.onload=function(){online(x.status===200);setHaz(x.responseText==='1')};
+  x.onerror=x.ontimeout=function(){online(false)};
+  x.send();
+}
+$('hz').onclick=function(){
+  var n=!haz;
+  var x=new XMLHttpRequest();
+  x.open('GET','/w?v='+(n?1:0),true);
+  x.timeout=1500;
+  x.onload=function(){online(true);setHaz(x.responseText==='1')};
+  x.onerror=x.ontimeout=function(){online(false)};
+  x.send();
+};
+function req(url){
+  var x=new XMLHttpRequest();
+  x.open('GET',url,true);
+  x.timeout=1500;
+  x.onload=function(){online(x.status===200)};
+  x.onerror=x.ontimeout=function(){online(false)};
+  x.send();
+}
+function tilt(rx,ry){
+  var g=$('glass').style;
+  g.setProperty('--rx',rx+'deg');
+  g.setProperty('--ry',ry+'deg');
+}
+function sel(n){
+  stopMove();
+  mir=n;
+  $('b1').className=n==1?'on':'';
+  $('b2').className=n==2?'on':'';
+  $('hub').textContent=n==1?'G':'D';
+  $('glass').style.setProperty('--sx',n==1?1:-1);
+  try{localStorage.setItem('mir',n)}catch(e){}
+}
+$('b1').onclick=function(){sel(1)};
+$('b2').onclick=function(){sel(2)};
+function stopMove(){
+  if(timer){clearInterval(timer);timer=null;req('/s');}
+  var a=document.querySelectorAll('.arr');
+  for(var i=0;i<a.length;i++)a[i].classList.remove('act');
+  tilt(0,0);
+  $('msg').textContent='Prêt';
+  $('msg').className='';
+}
+function startMove(b){
+  stopMove();
+  var a=b.dataset.a,d=b.dataset.d==='1';
+  var lab=a==='v'?(d?'haut':'bas'):(d?'gauche':'droite');
+  var rx=0,ry=0;
+  if(a==='v')rx=d?22:-22;else ry=d?-22:22;
+  tilt(rx,ry);
+  b.classList.add('act');
+  $('msg').textContent='Rétro '+NAMES[mir]+' · '+lab;
+  $('msg').className='go';
+  if(navigator.vibrate)navigator.vibrate(15);
+  var u=function(){req('/m?m='+mir+'&a='+a+'&d='+(d?1:0))};
+  u();
+  timer=setInterval(u,150);
+}
+var btns=document.querySelectorAll('.arr');
+for(var i=0;i<btns.length;i++){(function(b){
+  b.addEventListener('pointerdown',function(e){e.preventDefault();startMove(b)});
+  b.addEventListener('pointerup',stopMove);
+  b.addEventListener('pointerleave',stopMove);
+  b.addEventListener('pointercancel',stopMove);
+  b.addEventListener('contextmenu',function(e){e.preventDefault()});
+})(btns[i]);}
+window.addEventListener('blur',stopMove);
+document.addEventListener('visibilitychange',function(){if(document.hidden)stopMove()});
+try{var s=parseInt(localStorage.getItem('mir'));if(s===2)sel(2)}catch(e){}
+syncHaz();
+setInterval(function(){if(!timer)syncHaz()},3000);
+</script></body></html>
